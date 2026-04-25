@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zplus — Premium Phishing Detector & Safe Shortener</title>
+    
+    <!-- External Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- CDNs -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    
+    <!-- External Logic Engine -->
+    <script src="script.js" defer></script>
+</head>
+<body class="bg-black text-zinc-400 font-sans selection:bg-emerald-500/30 selection:text-emerald-400 overflow-x-hidden">
+
+    <!-- Matrix Background for Analysis -->
+    <canvas id="matrix-canvas"></canvas>
+
+    <!-- Overlay Scanline -->
+    <div class="fixed inset-0 pointer-events-none z-50 overflow-hidden opacity-5">
+        <div class="h-10 w-full bg-emerald-500/20 blur-xl animate-scanline"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass border-b border-white/5 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3 group cursor-pointer logo-group" onclick="resetApp()">
+                <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all duration-300 logo-icon">
+                    <i data-lucide="shield-check" class="text-white w-6 h-6"></i>
+                </div>
+                <span class="logo-3d font-display font-bold text-xl tracking-tighter">Zplus</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium">
+                <button onclick="toggleManual()" class="hover:text-emerald-400 transition-colors uppercase tracking-widest font-bold text-[10px]">How It Works</button>
+                <a href="https://owasp.org" target="_blank" class="hover:text-emerald-400 transition-colors uppercase tracking-widest font-bold text-[10px]">OWASP</a>
+                <a href="#" class="hover:text-emerald-400 transition-colors uppercase tracking-widest font-bold text-[10px]">GitHub</a>
+            </div>
+            <div class="md:hidden">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-12 md:py-24 space-y-24">
+        
+        <!-- Hero Section -->
+        <section id="hero" class="relative text-center space-y-8 max-w-4xl mx-auto">
+            <h1 class="text-5xl md:text-7xl font-display font-extrabold text-white tracking-tight leading-[1.1]">
+                <span class="hover-underline-animation">
+                    Identify & Secure <br>
+                    <span class="text-gradient">Phishing Links Instantly</span>
+                </span>
+            </h1>
+            <p class="text-lg md:text-xl text-zinc-500 max-w-2xl mx-auto">
+                Enterprise-grade URL analysis using OWASP heuristics and real-time behavioral scanning. No trackers, no cookies, total clinical precision.
+            </p>
+            
+            <!-- URL Input Container -->
+            <div class="mt-12 relative group max-w-3xl mx-auto">
+                <div class="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-zinc-800 to-emerald-500/20 rounded-2xl blur opacity-25 group-focus-within:opacity-100 transition duration-1000"></div>
+                <div class="relative glass rounded-2xl p-2 flex flex-col md:flex-row gap-2 border border-white/10">
+                    <div class="flex-1 flex items-center px-4">
+                        <i data-lucide="link" class="w-5 h-5 text-zinc-600"></i>
+                        <input type="text" id="url-input" placeholder="Paste suspicious URL here " 
+                               class="w-full bg-transparent border-none focus:ring-0 text-white placeholder:text-zinc-600 px-4 py-4 text-lg">
+                    </div>
+                    <button onclick="startAnalysis()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 active:scale-95 scan-glow">
+                        <i data-lucide="zap" class="w-5 h-5"></i>
+                        Scan Link
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Trust Badges -->
+            <div class="flex flex-wrap justify-center items-center gap-4 pt-12 transition-all duration-500">
+                <div class="trust-badge flex items-center gap-2 text-xs font-bold tracking-tighter">
+                    <i data-lucide="shield"></i> 256-BIT ENCRYPTION
+                </div>
+                <div class="trust-badge flex items-center gap-2 text-xs font-bold tracking-tighter">
+                    <i data-lucide="globe"></i> GLOBAL REPUTATION DATA
+                </div>
+                <div class="trust-badge flex items-center gap-2 text-xs font-bold tracking-tighter">
+                    <i data-lucide="lock"></i> SANDBOXED PREVIEWS
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Sequence -->
+        <section id="analysis-sequence" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl">
+            <div class="text-center space-y-8 max-w-2xl px-6 w-full">
+                <div id="url-fragments" class="text-3xl md:text-4xl font-mono text-emerald-400 h-10 flex justify-center items-center overflow-hidden"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="relative w-48 h-48 mx-auto">
+                        <svg class="w-full h-full transform -rotate-90">
+                            <circle cx="96" cy="96" r="88" stroke="currentColor" stroke-width="2" fill="transparent" class="text-zinc-900" />
+                            <circle id="analysis-progress" cx="96" cy="96" r="88" stroke="currentColor" stroke-width="2" fill="transparent" class="text-emerald-500 transition-all duration-100 ease-linear" stroke-dasharray="552.92" stroke-dashoffset="552.92" />
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span id="analysis-percentage" class="text-4xl font-display font-bold text-white">0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="glass p-6 rounded-xl border border-white/5 text-left h-48 overflow-y-auto no-scrollbar font-mono text-sm space-y-2" id="terminal-logs"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Panel -->
+        <section id="results-panel" class="hidden space-y-12">
+            <div class="flex flex-col md:flex-row items-end justify-between gap-6 border-b border-white/5 pb-8">
+                <div>
+                    <h2 class="text-3xl font-display font-bold text-white">Analysis Report</h2>
+                    <p id="report-url-display" class="text-zinc-500 font-mono text-sm break-all pt-1"></p>
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="resetApp()" class="px-6 py-2 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-sm font-medium">New Scan</button>
+                </div>
+            </div>
+
+            <div class="results-grid">
+                <div class="glass p-8 rounded-3xl border border-white/10 flex flex-col items-center justify-center text-center space-y-6 premium-border">
+                    <div id="verdict-orb" class="w-24 h-24 rounded-full flex items-center justify-center animate-pulse-slow">
+                        <i id="verdict-icon" data-lucide="shield-check" class="w-12 h-12 text-white"></i>
+                    </div>
+                    <div>
+                        <div id="verdict-label" class="text-4xl font-display font-black tracking-tighter uppercase mb-2">Safe</div>
+                        <p id="verdict-desc" class="text-zinc-500 text-sm px-4"></p>
+                    </div>
+                    
+                    <div class="radial-progress" id="trust-radial" style="--value: 98; --color: #10B981;">
+                        <span class="text-4xl font-display font-bold text-white"><span id="trust-score-num">98</span>%</span>
+                        <span class="text-[10px] uppercase tracking-widest text-zinc-600 font-bold block">Trust Score</span>
+                    </div>
+                </div>
+
+                <div class="glass p-6 rounded-3xl border border-white/10 md:col-span-2 overflow-hidden">
+                    <h3 class="text-white font-bold mb-6 flex items-center gap-2">
+                        <i data-lucide="list-checks" class="text-emerald-500 w-5 h-5"></i>
+                        OWASP Heuristic Audit
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="text-xs uppercase text-zinc-600 border-b border-white/5">
+                                <tr>
+                                    <th class="pb-4 pr-4">Security Check</th>
+                                    <th class="pb-4 pr-4">Result</th>
+                                    <th class="pb-4">Technical Rationale</th>
+                                </tr>
+                            </thead>
+                            <tbody id="owasp-checks-body" class="text-sm divide-y divide-white/5"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass p-6 rounded-3xl border border-white/10 lg:col-span-2">
+                    <h3 class="text-white font-bold mb-8 flex items-center gap-2">
+                        <i data-lucide="git-branch" class="text-emerald-500 w-5 h-5"></i>
+                        Redirection Trace
+                    </h3>
+                    <div id="redirect-trace" class="relative flex flex-col md:flex-row items-start md:items-center gap-8 py-4"></div>
+                </div>
+
+                <div class="glass p-6 rounded-3xl border border-white/10 space-y-6">
+                    <h3 class="text-white font-bold flex items-center gap-2">
+                        <i data-lucide="server" class="text-emerald-500 w-5 h-5"></i>
+                        Node Intelligence
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs uppercase font-bold text-zinc-500">IP Address</span>
+                            <span id="res-ip" class="text-white font-mono text-sm tracking-tight"></span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs uppercase font-bold text-zinc-500">Geo Location</span>
+                            <span id="res-geo" class="text-white text-sm"></span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs uppercase font-bold text-zinc-500">TLD Risk</span>
+                            <span id="res-tld" class="text-white text-sm"></span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
+                            <span class="text-xs uppercase font-bold text-zinc-500">Latency</span>
+                            <span id="res-latency" class="text-emerald-400 font-mono text-sm"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="glass p-4 rounded-3xl border border-white/10 space-y-4">
+                    <div class="flex items-center justify-between px-2">
+                        <h3 class="text-white font-bold flex items-center gap-2">
+                            <i data-lucide="eye" class="text-emerald-500 w-5 h-5"></i>
+                            Safe Sandbox Preview
+                        </h3>
+                        <span class="text-[10px] uppercase bg-amber-500/10 text-amber-500 px-2 py-1 rounded-md border border-amber-500/20 font-bold">Preview Only</span>
+                    </div>
+                    <div class="relative group cursor-zoom-in overflow-hidden rounded-2xl border border-white/10 aspect-video glass" onclick="zoomPreview()">
+                        <div id="preview-loader" class="absolute inset-0 flex items-center justify-center bg-zinc-900/50">
+                            <div class="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                        <img id="site-preview" src="" alt="Site Preview" class="w-full h-full object-cover opacity-0 transition-opacity duration-1000 grayscale hover:grayscale-0">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60"></div>
+                        <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center">
+                            <span class="text-[10px] text-zinc-400">Captured at 1280x720 • Grayscale Sandbox</span>
+                            <i data-lucide="maximize-2" class="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </section>
+
+        <section id="recents-section" class="space-y-8 pb-24">
+            <div class="flex items-center justify-between">
+                <h3 class="text-zinc-500 text-xs font-bold tracking-[0.2em] uppercase">Recent Forensic Scans</h3>
+                <button onclick="clearHistory()" id="clear-history-btn" class="text-[10px] text-zinc-600 hover:text-red-400 font-bold uppercase tracking-widest transition-colors hidden">Clear History</button>
+            </div>
+            <div id="recents-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"></div>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-white/5 bg-grey-950 py-12 px-6">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div class="space-y-4">
+                <div class="flex items-center gap-2 logo-group cursor-pointer" onclick="resetApp()">
+                    <div class="w-6 h-6 bg-emerald-500 rounded flex items-center justify-center logo-icon">
+                        <i data-lucide="shield-check" class="text-white w-4 h-4"></i>
+                    </div>
+                    <span class="logo-3d font-display font-bold text-lg">Zplus</span>
+                </div>
+                <p class="text-xs text-zinc-600 leading-relaxed">
+                    Designed for security researchers and professionals. Zplus provides static and dynamic analysis of URLs to mitigate phishing risks. All scans are conducted in a transient, non-persistent container.
+                </p>
+            </div>
+            <div class="text-right space-y-2">
+                <div class="text-xs font-bold text-zinc-400">© 2026 Zplus Infrastructure</div>
+                <div class="text-[10px] text-zinc-700 uppercase tracking-widest">Developed by <span class="text-amber-400 font-bold">Chirag</span></div>
+                <div class="text-[10px] text-zinc-700">VERSION 2.4.0-PRIME • STATUS: ALL SYSTEMS NOMINAL</div>
+            </div>
+        </div>
+    </footer>
+
+    <div id="image-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/95 p-6 md:p-12 cursor-zoom-out" onclick="closeModal()">
+        <img id="modal-image" src="" alt="Zoomed Preview" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl">
+    </div>
+
+    <!-- Forensic Field Manual (Modal) -->
+    <div id="field-manual" class="hidden fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl overflow-y-auto no-scrollbar py-20 px-6">
+        <div class="max-w-4xl mx-auto space-y-16">
+            <div class="flex justify-between items-start">
+                <div class="space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold tracking-widest uppercase">
+                        Protocol v2.4 Reference
+                    </div>
+                    <h2 class="text-5xl md:text-7xl font-display font-black text-white tracking-tighter leading-none">
+                        FIELD <br>
+                        <span class="text-gradient">MANUAL</span>
+                    </h2>
+                </div>
+                <button onclick="toggleManual()" class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors">
+                    <i data-lucide="x" class="w-6 h-6 text-white"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- Step 1 -->
+                <div class="space-y-6 group">
+                    <div class="w-12 h-12 rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center text-emerald-500 font-display font-black text-xl group-hover:scale-110 transition-transform">01</div>
+                    <h3 class="text-2xl font-display font-bold text-white">Neural Ingestion</h3>
+                    <p class="text-zinc-500 leading-relaxed">Paste any suspicious URL. Our engine immediately normalizes the string, strips obfuscation layers, and establishes a secure, transient sandbox container for the target.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="space-y-6 group text-right md:text-left">
+                    <div class="w-12 h-12 rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center text-emerald-500 font-display font-black text-xl ml-auto md:ml-0 group-hover:scale-110 transition-transform">02</div>
+                    <h3 class="text-2xl font-display font-bold text-white">Heuristic Extraction</h3>
+                    <p class="text-zinc-500 leading-relaxed">We apply 10+ OWASP-inspired checks. From Punycode/Homoglyph detection to entropy-based DGA analysis, we dissect the URL's anatomy for malicious markers.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="space-y-6 group">
+                    <div class="w-12 h-12 rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center text-emerald-500 font-display font-black text-xl group-hover:scale-110 transition-transform">03</div>
+                    <h3 class="text-2xl font-display font-bold text-white">Visual Forensics</h3>
+                    <p class="text-zinc-500 leading-relaxed">A live behavioral snapshot is captured via our sandbox. View the site's true appearance in grayscale without executing its code locally, neutralizing drive-by threats.</p>
+                </div>
+
+            </div>
+
+            <div class="pt-12 border-t border-white/5 flex flex-col items-center gap-6">
+                <div class="text-[10px] text-zinc-600 font-bold tracking-[0.3em] uppercase">Core Philosophy</div>
+                <div class="text-xl md:text-2xl text-white font-display italic text-center max-w-2xl px-4">
+                    "Visibility is the first line of defense. Precision is the second."
+                </div>
+                <button onclick="toggleManual()" class="mt-8 px-12 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl transition-all active:scale-95 uppercase tracking-widest text-xs">
+                    Authorize & Return
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 glass border-emerald-500/20 text-emerald-400 px-6 py-3 rounded-full text-sm font-bold shadow-2xl z-[100] translate-y-24 opacity-0 transition-all duration-300">
+        Copied to clipboard
+    </div>
+
+</body>
+</html>
