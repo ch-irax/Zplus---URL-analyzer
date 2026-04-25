@@ -22,6 +22,7 @@ Zplus is an enterprise-grade URL analysis tool designed for security researchers
 2. Open `index.html` in any modern web browser.
 3. Paste a suspicious URL into the input field and click **Scan Link**.
 4. Review the generated Forensic Analysis Report to determine the risk level.
+5. Here's the link :- https://zplusec.vercel.app/
 
 ## Philosophy
 
