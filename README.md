@@ -28,3 +28,5 @@ Zplus is an enterprise-grade URL analysis tool designed for security researchers
 _"Visibility is the first line of defense. Precision is the second."_
 
 Designed with no trackers and no cookies, Zplus ensures that all scans are conducted in a transient, non-persistent environment.
+
+Developed by Chirag
