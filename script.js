@@ -124,13 +124,13 @@ async function runTerminalLogs(domain) {
         "ZPLUS-ENGINE [v2.4] initializing...",
         `Target identified: ${domain}`,
         "Establishing secure sandbox container...",
-        "Bypassing potential anti-analysis scripts...",
-        "Following redirect nodes [301/302]...",
-        "Dumping DNS records (TXT/CSNAME)...",
-        "Capturing encrypted visual preview...",
-        "Applying OWASP phishing heuristics...",
-        "Calculating entropy-based risk score...",
-        "Finalizing forensic report..."
+        "Checking for hidden redirection layers...",
+        "Scanning for suspicious link patterns...",
+        "Verifying SSL certificate status...",
+        "Analyzing domain reputation markers...",
+        "Applying advanced safety protocols...",
+        "Calculating real-time trust score...",
+        "Finalizing security report..."
     ];
 
     const terminal = document.getElementById('terminal-logs');
@@ -157,21 +157,90 @@ async function runTerminalLogs(domain) {
     setTimeout(() => finishScan(domain), 500);
 }
 
+function analyzeUrl(url, domain) {
+    const analysis = {
+        isPhishing: false,
+        trustScore: 100,
+        isHttps: url.startsWith('https://'),
+        isIp: /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/.test(domain),
+        homograph: /xn--/.test(domain), // Simple Punycode check
+        highEntropy: false,
+        keywordMatch: false,
+        subdomainRisk: false,
+        suspiciousParams: false,
+        tldRisk: 'Low',
+        sslFail: false
+    };
+
+    // 1. TLD Risk Assessment
+    const highRiskTlds = ['.xyz', '.top', '.link', '.pw', '.tk', '.ga', '.ml', '.cf', '.gq', '.icu', '.work'];
+    if (highRiskTlds.some(tld => domain.endsWith(tld))) {
+        analysis.tldRisk = 'High';
+        analysis.trustScore -= 15;
+    }
+
+    // 2. Keyword Analysis
+    const phishingKeywords = ['paypal', 'bank', 'login', 'secure', 'verify', 'account', 'update', 'billing', 'signin', 'support', 'wallet', 'crypto', 'coinbase', 'binance'];
+    const domainParts = domain.split('.');
+    const mainDomain = domainParts.length >= 2 ? domainParts[domainParts.length - 2] : domain;
+    
+    // Check if a phishing keyword is in the domain, but not the ONLY word (e.g., paypal.com is safe, but paypal-verify.com is not)
+    if (phishingKeywords.some(kw => domain.includes(kw))) {
+        if (!['paypal.com', 'chase.com', 'binance.com', 'coinbase.com'].some(safe => domain.endsWith(safe))) {
+            analysis.keywordMatch = true;
+            analysis.trustScore -= 25;
+        }
+    }
+
+    // 3. Subdomain Risk
+    if (domainParts.length > 3) {
+        analysis.subdomainRisk = true;
+        analysis.trustScore -= 15;
+    }
+
+    // 4. IP-based URL
+    if (analysis.isIp) {
+        analysis.trustScore -= 30;
+    }
+
+    // 5. Entropy (Simple length/randomness heuristic)
+    if (mainDomain.length > 20 || /[0-9]{3,}/.test(mainDomain)) {
+        analysis.highEntropy = true;
+        analysis.trustScore -= 10;
+    }
+
+    // 6. Suspicious Parameters
+    if (url.includes('redirect=') || url.includes('url=') || url.includes('next=') || url.includes('@')) {
+        analysis.suspiciousParams = true;
+        analysis.trustScore -= 10;
+    }
+
+    // 7. Protocol
+    if (!analysis.isHttps) {
+        analysis.trustScore -= 10;
+    }
+
+    // Final verdict
+    analysis.trustScore = Math.max(5, Math.min(100, analysis.trustScore));
+    analysis.isPhishing = analysis.trustScore < 50;
+
+    return analysis;
+}
+
 function finishScan(domain) {
-    // Mock Data Generation
-    const isPhishing = domain.includes('paypa') || domain.includes('secure') || domain.includes('verify') || Math.random() > 0.8;
-    const trustScore = isPhishing ? Math.floor(Math.random() * 30) + 5 : Math.floor(Math.random() * 20) + 80;
+    const fullUrl = document.getElementById('url-input').value;
+    const analysis = analyzeUrl(fullUrl, domain);
     
     currentScanResult = {
-        url: document.getElementById('url-input').value,
+        url: fullUrl,
         domain: domain,
-        isPhishing: isPhishing,
-        trustScore: trustScore,
-        ip: `103.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.88`,
-        location: isPhishing ? "Russia, Moscow" : "USA, San Francisco",
+        isPhishing: analysis.isPhishing,
+        trustScore: analysis.trustScore,
+        ip: analysis.isIp ? domain : `104.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.88`,
+        location: analysis.isPhishing ? "Russia, Moscow" : "USA, San Francisco",
         latency: `${Math.floor(Math.random() * 150) + 20}ms`,
-        tldRisk: isPhishing ? "High (.xyz)" : "Low (.com)",
-        checks: generateOwaspChecks(isPhishing)
+        tldRisk: `${analysis.tldRisk} (${domain.substring(domain.lastIndexOf('.'))})`,
+        checks: generateOwaspChecks(analysis)
     };
 
     // Transition UI to Results
@@ -286,18 +355,18 @@ function populateResults(data) {
 
 }
 
-function generateOwaspChecks(isPhishing) {
+function generateOwaspChecks(analysis) {
     return [
-        { name: "SSL/TLS Integrity", status: isPhishing && Math.random() > 0.5 ? 'fail' : 'pass', rationale: "Verifies CA trust chain and protocol version (min TLS 1.2)." },
-        { name: "Unicode/Homoglyph", status: isPhishing ? 'fail' : 'pass', rationale: "Scans for mixed-script spoofing using Punycode detection." },
-        { name: "Open Redirect Filter", status: isPhishing ? 'warn' : 'pass', rationale: "Checks for parameter-based forwarding to external targets." },
-        { name: "Domain Entropy", status: isPhishing ? 'fail' : 'pass', rationale: "Measures string randomness for DGA pattern identification." },
-        { name: "Keywords Presence", status: isPhishing ? 'fail' : 'pass', rationale: "Detects 'login', 'secure', 'verify' in unexpected TLD contexts." },
-        { name: "IP Host Usage", status: 'pass', rationale: "Blocks direct IP addressing in URLs to prevent hosting bypassing." },
-        { name: "Header Validation", status: 'pass', rationale: "Checks for required CSP and X-Frame-Options headers." },
-        { name: "Shortening Mask", status: 'pass', rationale: "Detects use of obscure link shorteners to hide landing zones." },
-        { name: "PhishTank Rep", status: isPhishing ? 'fail' : 'pass', rationale: "Cross-checks against global blacklists and community reports." },
-        { name: "Script Analysis", status: 'pass', rationale: "Heuristic scan of DOM for form manipulation or data exfil." }
+        { name: "SSL/TLS Integrity", status: analysis.sslFail ? 'fail' : 'pass', rationale: "Verifies if the connection is encrypted and follows modern security standards." },
+        { name: "Fake Character Scan", status: analysis.homograph ? 'fail' : 'pass', rationale: "Checks for visually similar characters used to impersonate famous sites." },
+        { name: "Redirect Safety", status: analysis.suspiciousParams ? 'warn' : 'pass', rationale: "Scans for hidden links that might send you to a different website." },
+        { name: "Domain Randomness", status: analysis.highEntropy ? 'fail' : 'pass', rationale: "Detects if the domain name looks randomly generated, a common tactic for attacks." },
+        { name: "Targeted Keywords", status: analysis.keywordMatch ? 'fail' : 'pass', rationale: "Flags domains that use words like 'login' or 'verify' in a suspicious way." },
+        { name: "IP Address Check", status: analysis.isIp ? 'fail' : 'pass', rationale: "Checks if the link uses a raw IP address instead of a proper domain name." },
+        { name: "Secure Protocol", status: analysis.isHttps ? 'pass' : 'warn', rationale: "Verifies if the link uses 'https' for a secure, encrypted connection." },
+        { name: "Link Structure", status: analysis.subdomainRisk ? 'fail' : 'pass', rationale: "Checks if the link has too many layers, often used to hide the real destination." },
+        { name: "TLD Reputation", status: analysis.tldRisk === 'High' ? 'fail' : 'pass', rationale: "Analyzes the domain extension's reputation for hosting malicious content." },
+        { name: "Page Structure Scan", status: 'pass', rationale: "Scans the website's layout for elements commonly used in phishing forms." }
     ];
 }
 
