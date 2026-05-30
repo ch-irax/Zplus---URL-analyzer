@@ -1,4 +1,4 @@
-# Zplus — Premium Phishing Detector
+# Zplus — Premium Phishing Detector (URL analysis tool)
 
 Zplus is a professional URL analysis tool designed to identify and secure phishing links instantly. It uses advanced safety protocols and real-time behavioral scanning to provide high-precision security audits.
 
