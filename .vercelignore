@@ -1,0 +1,10 @@
+.git
+.github
+node_modules
+.env
+.env.local
+*.log
+coverage
+.prisma/cache
+prisma/migrations/*.sql
+scratch

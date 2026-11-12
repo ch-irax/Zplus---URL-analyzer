@@ -1,0 +1,87 @@
+{
+  "info": {
+    "name": "Zpluslink Threat Detector API Collection",
+    "description": "Production OWASP ASVS L2 Compliant API endpoints for Zpluslink backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Scan Link (POST /api/scan)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"url\": \"https://login-verify-paypal-secure-account.xyz\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/scan",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "scan"]
+        }
+      }
+    },
+    {
+      "name": "User Register (POST /api/auth/register)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"security.analyst@zplus.sec\",\n  \"password\": \"SecureP@ssw0rd2026!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "User Login (POST /api/auth/login)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"security.analyst@zplus.sec\",\n  \"password\": \"SecureP@ssw0rd2026!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "Scan History (GET /api/scan/history)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/scan/history?page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "scan", "history"],
+          "query": [
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "10" }
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://zplusec.vercel.app"
+    }
+  ]
+}

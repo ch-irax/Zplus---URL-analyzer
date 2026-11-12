@@ -1,0 +1,26 @@
+{
+  "name": "zpluslink",
+  "version": "1.0.0",
+  "description": "Zplus is a professional URL analysis tool designed to identify and secure phishing links instantly. It uses advanced safety protocols and real-time behavioral scanning to provide high-precision security audits.",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ch-irax/Zplus.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ch-irax/Zplus/issues"
+  },
+  "homepage": "https://github.com/ch-irax/Zplus#readme",
+  "dependencies": {
+    "axios": "^1.18.1",
+    "cheerio": "^1.2.0",
+    "express": "^5.2.1",
+    "node-fetch": "^3.3.2"
+  }
+}

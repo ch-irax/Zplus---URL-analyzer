@@ -11,7 +11,29 @@
     
     <!-- CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        black: '#050505',
+                        emerald: {
+                            500: '#10B981',
+                            400: '#34D399',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Orbitron', 'Outfit', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        };
+    </script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     
@@ -51,15 +73,31 @@
     <main class="max-w-7xl mx-auto px-6 py-12 md:py-24 space-y-24">
         
         <!-- Hero Section -->
-        <section id="hero" class="relative text-center space-y-8 max-w-4xl mx-auto">
-            <h1 class="text-5xl md:text-7xl font-display font-extrabold text-white tracking-tight leading-[1.1]">
-                <span class="hover-underline-animation">
-                    Identify & Secure <br>
-                    <span class="text-gradient">Phishing Links Instantly</span>
-                </span>
-            </h1>
-            <p class="text-lg md:text-xl text-zinc-500 max-w-2xl mx-auto">
-                Enterprise-grade URL analysis using global safety protocols and real-time behavioral scanning. No trackers, no cookies, total clinical precision.
+        <section id="hero" class="relative text-center space-y-8 max-w-5xl mx-auto">
+
+            <!-- Hero Morph Frame with Cyber Emerald Accent Lines -->
+            <div class="hero-morph-frame">
+                <!-- Top Glowing Emerald Accent Line -->
+                <div class="hero-green-line top-line"></div>
+
+                <h1 class="hero-title">
+                    <span class="hero-line">Identify &amp; Secure</span>
+                    <span class="hero-line hero-morph-line">
+                        <span class="morph-stage" id="hero-morph-stage">
+                            <span class="morph-word morph-visible" id="morph-word-a">Phishing Links</span>
+                            <span class="morph-word morph-hidden"  id="morph-word-b" aria-hidden="true"></span>
+                        </span>
+                    </span>
+                    <span class="hero-line">Instantly</span>
+                </h1>
+
+                <!-- Bottom Glowing Emerald Accent Line -->
+                <div class="hero-green-line bottom-line"></div>
+            </div>
+
+            <p class="hero-subtext">
+                Enterprise-grade URL analysis using global safety protocols and real-time behavioral scanning.
+                No trackers, no cookies, total clinical precision.
             </p>
             
             <!-- URL Input Container -->

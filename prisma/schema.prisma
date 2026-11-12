@@ -1,0 +1,90 @@
+// This is your Prisma schema file for Zpluslink Threat Engine
+// Optimized for Neon Serverless PostgreSQL & Vercel deployment with ASVS L2 Audit Trail
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  hashedPassword String
+  createdAt      DateTime @default(now())
+
+  scans     Scan[]
+  auditLogs AuditLog[]
+
+  @@index([email])
+}
+
+model Scan {
+  id            String   @id @default(cuid())
+  userId        String?
+  originalUrl   String   @db.Text
+  normalizedUrl String
+  trustScore    Int
+  maliciousFlag Boolean  @default(false)
+  sandboxHash   String?
+  createdAt     DateTime @default(now())
+
+  user              User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  redirectionTraces RedirectionTrace[]
+  nodeIntelligences NodeIntelligence[]
+
+  @@index([userId])
+  @@index([normalizedUrl])
+  @@index([createdAt])
+  @@index([maliciousFlag])
+}
+
+model RedirectionTrace {
+  id        String   @id @default(cuid())
+  scanId    String
+  hopNumber Int
+  url       String   @db.Text
+  ip        String?
+  geo       String?
+  timestamp DateTime @default(now())
+
+  scan Scan @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  @@index([scanId])
+  @@index([scanId, hopNumber])
+}
+
+model NodeIntelligence {
+  id              String   @id @default(cuid())
+  scanId          String
+  nodeType        String
+  ip              String?
+  reputationScore Int
+  lastSeen        DateTime @default(now())
+
+  scan Scan @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  @@index([scanId])
+  @@index([nodeType])
+  @@index([ip])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  ip        String
+  userAgent String?
+  details   String?  @db.Text
+  timestamp DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+}

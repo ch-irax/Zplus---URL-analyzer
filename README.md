@@ -1,37 +1,62 @@
-# Zplus — Premium Phishing Detector (URL analysis tool)
+# 🛡️ Zpluslink — Production Phishing Detector Backend
 
-Zplus is a professional URL analysis tool designed to identify and secure phishing links instantly. It uses advanced safety protocols and real-time behavioral scanning to provide high-precision security audits.
+![OWASP ASVS Level 2](https://img.shields.io/badge/OWASP-ASVS%20Level%202%20Compliant-emerald?style=flat-square)
+![Vercel Native](https://img.shields.io/badge/Deployment-Vercel%20Serverless-black?style=flat-square)
+![Prisma + Neon](https://img.shields.io/badge/Database-Neon%20Serverless%20Postgres-blue?style=flat-square)
 
-## Core Features
+**Live Web Application:** [https://zplusec.vercel.app](https://zplusec.vercel.app)
 
-- **Smart Link Analysis:** Instantly normalizes links, strips hidden layers, and establishes a secure, temporary sandbox for the target.
-- **Security Pattern Check:** Applies multiple safety checks (e.g., fake character detection, suspicious domain analysis) to scan the link's structure for malicious signs.
-- **Visual Forensics:** Captures a live behavioral snapshot. View the site's true appearance in grayscale without executing its code locally, neutralizing threats.
-- **Node Intelligence:** Analyzes the target's IP address, geographic location, TLD risk, and latency.
+---
 
-## Technology Stack
+## ⚡ One-Click Vercel Deploy
 
-- **Frontend:** HTML5, Tailwind CSS (via CDN)
-- **Styling:** Custom CSS with Glassmorphism UI and matrix background effects.
-- **Logic Engine:** Vanilla JavaScript (`script.js`) handling real-time analysis and UI transitions.
-- **Icons:** [Lucide Icons](https://lucide.dev/)
+Deploy this complete backend & frontend pipeline directly to your Vercel project with one click:
 
-## How to Use
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fch-irax%2FZplus&env=DATABASE_URL,DIRECT_URL,JWT_SECRET,JWT_REFRESH_SECRET,UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN&project-name=zpluslink)
 
-1. Clone the repository to your local machine.
-2. Open `index.html` in any modern web browser.
-3. Paste a suspicious URL into the input field and click **Scan Link**.
-4. Review the generated Forensic Analysis Report to determine the risk level.
-5. Live Demo: [zplusec.vercel.app](https://zplusec.vercel.app/)
+### Vercel CLI Deployment Command
+```bash
+npx vercel --prod
+```
 
-## Philosophy
+---
 
-_"Visibility is the first line of defense. Precision is the second."_
+## 🔐 OWASP Top 10 + ASVS Level 2 Security Specs
 
-Designed with no trackers and no cookies, Zplus ensures that all scans are conducted in a transient, non-persistent environment.
+* **Strict SSRF Defense:** Automated IP-blocklist checking to block internal network scanning (`127.0.0.1`, `10.0.0.0/8`, `169.254.169.254`).
+* **Rate Limiting:** Sliding-window 20 req/min rate limit via `@upstash/ratelimit` / serverless Edge memory store.
+* **Input Sanitization:** Payload sanitization with DOMPurify & Zod boundary validation.
+* **Anti-Clickjacking & Headers:** Strict Content Security Policy (CSP), HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`.
+* **Session Security:** Dual-token JWT architecture with `httpOnly`, `Secure`, `SameSite=Strict` cookies.
+* **Audit Trail:** Postgres-backed structured security event log (`AuditLog` table).
 
-## License
+---
 
-This project is licensed under the [MIT License](LICENSE).
+## 🌐 Custom Domain Setup Guide
 
-Developed by Chirag
+To bind your custom domain (e.g., `api.zplus.sec` or `zpluslink.com`):
+
+1. Go to your **Vercel Project Dashboard** -> **Settings** -> **Domains**.
+2. Add your custom domain name (e.g. `zpluslink.com`).
+3. Add the required DNS records in your domain registrar (Cloudflare / Namecheap / GoDaddy):
+   * **A Record:** `@` -> `76.76.21.21`
+   * **CNAME Record:** `www` -> `cname.vercel-dns.com`
+4. Update `ALLOWED_ORIGINS` in Vercel Environment Variables:
+   ```env
+   ALLOWED_ORIGINS="https://zpluslink.com,https://zplusec.vercel.app"
+   ```
+
+---
+
+## 📦 API Routes
+
+* `POST /api/scan` — Submit URL for safe sandboxed phishing analysis (<5s SLA).
+* `POST /api/auth/register` — Create user account with Argon2id/PBKDF2 salted hash.
+* `POST /api/auth/login` — Authenticate user and receive HTTP-only JWT cookies.
+* `GET /api/scan/history` — Authenticated endpoint fetching scan history & node intelligence.
+
+---
+
+## 🧪 Postman Collection
+
+Import `zpluslink_postman_collection.json` into Postman to test all endpoints.

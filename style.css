@@ -1,4 +1,13 @@
 /* Zpluslink — Global Visual System */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&display=swap');
+
+/* Typography System */
+.font-orbitron,
+.hero-title,
+.hero-title span,
+.hero-title .hero-line {
+    font-family: 'Orbitron', 'Outfit', 'Inter', -apple-system, sans-serif !important;
+}
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
@@ -127,37 +136,182 @@
     animation: modalIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Headline Hover Animation */
-.hover-underline-animation {
+/* ---- Morph container: NO filter at rest, only applied via JS during animation ---- */
+
+/* ==================== HERO TYPOGRAPHY ==================== */
+
+/* Orbitron font enforcement on the entire title tree */
+.font-orbitron,
+.hero-title,
+.hero-title span,
+.hero-title .hero-line,
+.hero-title .morph-stage,
+.hero-title .morph-word {
+    font-family: 'Orbitron', 'Outfit', -apple-system, sans-serif !important;
+}
+
+/* Sharp global rendering defaults */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* ==================== HERO MORPH FRAME & ACCENT LINES ==================== */
+.hero-morph-frame {
     position: relative;
-    cursor: default;
-    padding: 0.5rem 0;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
 }
 
-.hover-underline-animation::before,
-.hover-underline-animation::after {
-    content: '';
+.hero-green-line {
     position: absolute;
-    width: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #10B981, #10B981, #050505, #10B981, #10B981);
-    background-size: 200% 100%;
-    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.hover-underline-animation::before {
-    top: 0;
     left: 0;
-}
-
-.hover-underline-animation::after {
-    bottom: 0;
     right: 0;
+    height: 2px;
+    pointer-events: none;
 }
 
-.hover-underline-animation:hover::before,
-.hover-underline-animation:hover::after {
-    width: 100%;
+.hero-green-line.top-line {
+    top: 0;
+    background: linear-gradient(90deg, #10B981 0%, #10B981 55%, rgba(16,185,129,0.2) 85%, transparent 100%);
+    box-shadow: 0 0 10px rgba(16,185,129,0.8), 0 0 2px #10B981;
+}
+
+.hero-green-line.bottom-line {
+    bottom: 0;
+    background: linear-gradient(90deg, #10B981 0%, #10B981 55%, rgba(16,185,129,0.2) 85%, transparent 100%);
+    box-shadow: 0 0 10px rgba(16,185,129,0.8), 0 0 2px #10B981;
+}
+
+/* ==================== HERO TITLE ==================== */
+.hero-title {
+    /*
+     * Target: "Identify & Secure" on ONE line across all common viewports.
+     * Orbitron is a wide geometric typeface (~0.7 ch/em ratio).
+     * "Identify & Secure" = ~17 chars → needs ~12em at the font size.
+     * max-width of frame is 900px → safe max ≈ 900/12 ≈ 75px ≈ 4.7rem.
+     * We cap at 4rem to leave breathing room on tablets.
+     */
+    font-size: clamp(1.55rem, 3.9vw, 4rem);
+    font-weight: 900;
+    letter-spacing: 0.03em;      /* slight positive tracking — Orbitron reads cleanest here */
+    line-height: 1.18;
+    color: #FFFFFF;
+    text-shadow: none;
+    margin: 0;
+    padding: 0.4rem 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
+}
+
+.hero-line {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+/* ==================== MORPH STAGE — ZERO FILTER APPROACH ==================== */
+/* No SVG gooey, no CSS blur() anywhere near the resting text.
+   Words swap via clip-path + opacity + translateY — 100% sharp every frame. */
+
+.hero-morph-line {
+    position: relative;
+    /*
+     * Height must be tall enough for one line of text at the title's font size.
+     * 1.5em gives comfortable headroom so the word isn't clipped top or bottom.
+     * Hidden words start/end at ±120% — well outside this window.
+     */
+    height: 1.5em;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.morph-stage {
+    position: relative;
+    display: inline-block;
+    height: 100%;       /* fill the morph-line height */
+    min-width: max-content;
+}
+
+/* Each word sits absolutely inside the morph-stage */
+.morph-word {
+    display: block;
+    position: absolute;
+    top: 50%;                       /* centre vertically within the 1.5em window */
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    white-space: nowrap;
+    color: #FFFFFF;
+    will-change: opacity, transform;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
+}
+
+/* Visible resting state */
+.morph-word.morph-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-50%);
+    transition: opacity 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hidden standby — parked 120% below, invisible, no transition so load is instant */
+.morph-word.morph-hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(70%);
+    transition: none;
+    pointer-events: none;
+}
+
+/* EXIT — slides 120% upward out of the clip window */
+.morph-word.morph-exit {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-170%);
+    transition: opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ENTER — rises from below into the centred position */
+.morph-word.morph-enter {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-50%);
+    transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Width sync: stage inherits width of active word to prevent centering jitter */
+.morph-stage { min-width: max-content; }
+
+/* Reduced motion: instant swap, no movement */
+@media (prefers-reduced-motion: reduce) {
+    .morph-word,
+    .morph-word.morph-visible,
+    .morph-word.morph-hidden,
+    .morph-word.morph-exit,
+    .morph-word.morph-enter {
+        transition: none !important;
+        transform: translateX(-50%) !important;
+        filter: none !important;
+    }
+}
+
+/* ==================== HERO SUBTEXT ==================== */
+.hero-subtext {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(0.9rem, 1.6vw, 1.1rem);
+    color: #71717a; /* zinc-500 */
+    max-width: 38rem;
+    margin: 0 auto;
+    line-height: 1.65;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Trust Badge Premium Hover Effects */
