@@ -1,4 +1,4 @@
-# 🛡️ Zpluslink — Production Phishing Detector Backend
+# 🛡️ Zpluslink — Production Phishing Detector 
 
 ![OWASP ASVS Level 2](https://img.shields.io/badge/OWASP-ASVS%20Level%202%20Compliant-emerald?style=flat-square)
 ![Vercel Native](https://img.shields.io/badge/Deployment-Vercel%20Serverless-black?style=flat-square)
